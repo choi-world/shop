@@ -1,0 +1,10 @@
+services:
+  mysql:
+    container_name: mysql_prd
+    environment:
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 12345678
+      MYSQL_DATABASE: shop_prd
+    restart: always
+    ports:
+      - '10206:3306'
