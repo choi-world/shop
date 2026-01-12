@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '../db/database.module';
+import { DatabaseModule } from '../../db/database.module';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { OrdersRepository } from './orders.repository';
@@ -9,6 +9,6 @@ import { OrderItemsRepository } from './order-items.repository';
   imports: [DatabaseModule],
   controllers: [OrdersController],
   providers: [OrdersRepository, OrderItemsRepository, OrdersService],
-  exports: [OrdersService, OrdersRepository, OrderItemsRepository],
+  exports: [OrdersRepository, OrderItemsRepository],
 })
 export class OrdersModule {}

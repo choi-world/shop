@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from '../../../src/users/users.service';
-import { UsersRepository } from '../../../src/users/users.repository';
-import { AddressesRepository } from '../../../src/users/addresses.repository';
+import { UsersService } from '../../../src/shop/users/users.service';
+import { UsersRepository } from '../../../src/shop/users/users.repository';
+import { AddressesRepository } from '../../../src/shop/users/addresses.repository';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -48,4 +48,3 @@ describe('UsersService', () => {
     expect(addressesRepository).toBeDefined();
   });
 });
-

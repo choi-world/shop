@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsService } from '../../../src/products/products.service';
-import { ProductsRepository } from '../../../src/products/products.repository';
+import { ProductsService } from '../../../src/shop/products/products.service';
+import { ProductsRepository } from '../../../src/shop/products/products.repository';
 
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -33,4 +33,3 @@ describe('ProductsService', () => {
     expect(productsRepository).toBeDefined();
   });
 });
-
