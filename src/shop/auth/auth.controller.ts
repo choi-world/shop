@@ -31,5 +31,17 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout() {}
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const { userId } = (req as any).user;
+    const refreshToken = req.cookies?.refresh_token;
+    if (!userId) throw new HttpException('유효하지 않은 로그인입니다.', HttpStatus.UNAUTHORIZED);
+
+    await this.authService.logout(userId, refreshToken);
+
+    res.clearCookie('access_token', { httpOnly: true, sameSite: 'lax', secure: true });
+    res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'lax', secure: true });
+
+    return { ok: true };
+  }
 }

@@ -52,7 +52,7 @@ export class AuthService {
    * @param refreshToken 리프레시 토큰
    * @returns 리프레시 토큰 활용한 액세스 토큰 재발급
    */
-  async refresh(refreshToken: string) {
+  async refresh(refreshToken: string): Promise<string> {
     try {
       const payload = await this.jwt.verifyAsync(refreshToken, { secret: process.env.JWT_SECRET });
       if (!payload) throw new HttpException('페이로드를 불러올 수 없습니다.', HttpStatus.UNAUTHORIZED);
@@ -73,6 +73,28 @@ export class AuthService {
       );
 
       return newAccessToken;
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  /**
+   * 로그아웃
+   * @param userId 세션 로그인된 유저 인덱스
+   * @returns 로그아웃
+   */
+  async logout(userId: string, refreshToken: string): Promise<boolean> {
+    try {
+      const payload = await this.jwt.verifyAsync(refreshToken, { secret: process.env.JWT_SECRET });
+      if (!payload) throw new HttpException('페이로드를 불러올 수 없습니다.', HttpStatus.UNAUTHORIZED);
+
+      const userId = payload.sub;
+      const randomUUID = payload.randomUUID;
+      if (!userId || !randomUUID) throw new HttpException('유저 정보를 확인할 수 없습니다.', HttpStatus.UNAUTHORIZED);
+
+      await this.redis.del(`refresh:${userId}:${randomUUID}`);
+
+      return true;
     } catch (e) {
       throw e;
     }
