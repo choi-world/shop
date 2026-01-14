@@ -13,4 +13,16 @@ export class AuthRepository {
 
     return q.execute();
   }
+
+  async insertAuth(data: Record<string, any>): Promise<any> {
+    let q = this.db.insertInto('auth').values({
+      auth_idx: data.auth_idx,
+      user_idx: data.user_idx,
+      account_name: data.account_name,
+      password: data.password ? data.password : null,
+      social_idx: data.social_idx,
+    });
+
+    return q.executeTakeFirst();
+  }
 }

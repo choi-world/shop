@@ -11,13 +11,7 @@ import { RedisService } from 'src/common/redis/redis.service';
 @Module({
   imports: [DatabaseModule, HttpModule],
   controllers: [AuthController],
-  providers: [
-    AuthRepository,
-    AuthService,
-    JwtStrategy,
-    JwtService,
-    RedisService,
-  ],
+  providers: [AuthRepository, AuthService, JwtStrategy, JwtService, RedisService],
   exports: [AuthRepository],
 })
 export class AuthModule {}

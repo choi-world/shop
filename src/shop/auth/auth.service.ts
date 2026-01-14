@@ -33,7 +33,15 @@ export class AuthService {
           break;
       }
       const authCheck = await this.authRepository.findAuth(authInfo);
-      if (authCheck && authCheck.length < 1) throw new HttpException('사용자를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
+      if (authCheck && authCheck.length < 1)
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.NOT_FOUND,
+            message: '사용자를 찾을 수 없습니다.',
+            info: authInfo,
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       const randomUUID = crypto.randomUUID();
       const accessToken = await this.jwt.signAsync({ sub: authCheck[0].user_idx }, { secret: process.env.JWT_SECRET, expiresIn: '15m' });
