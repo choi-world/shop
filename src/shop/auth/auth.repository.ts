@@ -25,4 +25,13 @@ export class AuthRepository {
 
     return q.executeTakeFirst();
   }
+
+  async findAdminAuth(where: Record<string, any>): Promise<any> {
+    let q = this.db.selectFrom('auth').selectAll('auth');
+
+    if (where.userIdx && where.userIdx != '') q = q.where('auth.user_idx', '=', where.userIdx);
+    if (where.accountName && where.accountName != '') q = q.where('auth.account_name', '=', where.accountName);
+
+    return q.execute();
+  }
 }

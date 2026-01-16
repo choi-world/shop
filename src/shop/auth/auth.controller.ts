@@ -9,8 +9,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto: LoginDTO, @Res({ passthrough: true }) res: Response) {
-    const { accessToken, refreshToken } = await this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDTO, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const checkRefreshToken = req.cookies?.refresh_token;
+    const { accessToken, refreshToken } = await this.authService.login(loginDto, checkRefreshToken);
 
     res.cookie('access_token', accessToken, { httpOnly: true, sameSite: 'lax', path: '/' });
     res.cookie('refresh_token', refreshToken, { httpOnly: true, sameSite: 'lax', path: '/' });
@@ -37,10 +38,21 @@ export class AuthController {
     const refreshToken = req.cookies?.refresh_token;
     if (!userId) throw new HttpException('유효하지 않은 로그인입니다.', HttpStatus.UNAUTHORIZED);
 
-    await this.authService.logout(userId, refreshToken);
+    await this.authService.logout(refreshToken);
 
     res.clearCookie('access_token', { httpOnly: true, sameSite: 'lax', secure: true });
     res.clearCookie('refresh_token', { httpOnly: true, sameSite: 'lax', secure: true });
+
+    return { ok: true };
+  }
+
+  @Post('login/admin')
+  async adminLogin(@Req() req: Request, @Body() loginDto: LoginDTO, @Res({ passthrough: true }) res: Response) {
+    const checkRefreshToken = req.cookies?.refresh_token;
+    const { accessToken, refreshToken } = await this.authService.adminLogin(loginDto, checkRefreshToken);
+
+    res.cookie('access_token', accessToken, { httpOnly: true, sameSite: 'lax', path: '/' });
+    res.cookie('refresh_token', refreshToken, { httpOnly: true, sameSite: 'lax', path: '/' });
 
     return { ok: true };
   }
