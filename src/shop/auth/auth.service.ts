@@ -32,6 +32,8 @@ export class AuthService {
       if (role == 'ADMIN') throw new HttpException('올바르지 않는 접근입니다. 브라우저를 종료하고 다시 접근해주세요.', HttpStatus.BAD_REQUEST);
     }
 
+    // 2026.01.18 이미 로그인한 경우에는 서드파티를 거치지 않고 로그인할 수 있도록 추가가 필요해보임?
+
     try {
       switch (loginDto.type) {
         case 'kakao':
