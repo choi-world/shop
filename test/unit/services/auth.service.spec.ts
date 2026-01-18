@@ -20,6 +20,7 @@ describe('AuthService', () => {
   const redisMock = {
     set: jest.fn(),
     get: jest.fn(),
+    del: jest.fn(),
   };
 
   const httpMock = {
@@ -30,6 +31,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     jest.spyOn(crypto, 'randomUUID').mockReturnValue('fixed-uuid' as any);
     process.env.JWT_SECRET = 'test-secret';
+    jest.clearAllMocks();
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -186,6 +188,28 @@ describe('AuthService', () => {
       expect(service.refresh('refresh-token')).rejects.toMatchObject({
         status: 401,
       });
+    });
+  });
+
+  describe('로그아웃', () => {
+    it('로그아웃을 하면 리프레시 토큰을 삭제하고 참을 반환한다.', async () => {
+      const userId = 1;
+      const randomUUID = 'fixed-uuid';
+      const role = 'USER';
+
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: userId,
+        randomUUID: randomUUID,
+        role: role,
+      });
+
+      redisMock.del.mockResolvedValue('1');
+
+      const result = await service.logout('refresh-token');
+
+      expect(result).toEqual(true);
+      expect(redisMock.del).toHaveBeenCalledWith(`refresh:${userId}:${randomUUID}`);
+      expect(jwtMock.signAsync).not.toHaveBeenCalled();
     });
   });
 });

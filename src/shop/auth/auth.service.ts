@@ -108,13 +108,13 @@ export class AuthService {
   async logout(refreshToken: string): Promise<boolean> {
     try {
       const payload = await this.jwt.verifyAsync(refreshToken, { secret: process.env.JWT_SECRET });
-      if (!payload) throw new HttpException('페이로드를 불러올 수 없습니다.', HttpStatus.UNAUTHORIZED);
 
-      const userId = payload.sub;
-      const randomUUID = payload.randomUUID;
-      if (!userId || !randomUUID) throw new HttpException('유저 정보를 확인할 수 없습니다.', HttpStatus.UNAUTHORIZED);
+      if (payload) {
+        const userId = payload.sub;
+        const randomUUID = payload.randomUUID;
 
-      await this.redis.del(`refresh:${userId}:${randomUUID}`);
+        if (userId && randomUUID) await this.redis.del(`refresh:${userId}:${randomUUID}`);
+      }
 
       return true;
     } catch (e) {
