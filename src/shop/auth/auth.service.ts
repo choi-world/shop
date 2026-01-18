@@ -206,10 +206,10 @@ export class AuthService {
 
   /**
    * 관리자 로그인
-   * @param loginDTO 로그인 정보
+   * @param loginDto 로그인 정보
    * @returns 관리자 로그인
    */
-  async adminLogin(loginDTO: LoginDTO, checkRefreshToken: string): Promise<Record<string, any>> {
+  async adminLogin(loginDto: LoginDTO, checkRefreshToken: string): Promise<Record<string, any>> {
     let payload: any;
 
     if (checkRefreshToken) payload = await this.jwt.verifyAsync(checkRefreshToken, { secret: process.env.JWT_SECRET });
@@ -221,15 +221,15 @@ export class AuthService {
 
       param.userIdx = payload.sub;
     } else {
-      param.accountName = loginDTO.account;
+      param.accountName = loginDto.account;
     }
 
     const adminAccount = await this.authRepository.findAdminAuth(param);
     if (adminAccount.length < 1) throw new HttpException('존재하지 않는 유저입니다.', HttpStatus.NOT_FOUND);
 
-    if (loginDTO.password && loginDTO.password != '') {
-      const passwordMatch = await bcrypt.compare(loginDTO.password, adminAccount[0].password);
-      if (!passwordMatch) throw new HttpException('비밀번호가 올바르지 않습니다.', HttpStatus.UNAUTHORIZED);
+    if (loginDto.password && loginDto.password != '') {
+      const passwordMatch = await bcrypt.compare(loginDto.password, adminAccount[0].password);
+      if (!passwordMatch) throw new HttpException('비밀번호가 올바르지 않습니다.', HttpStatus.BAD_REQUEST);
     }
 
     const randomUUID = crypto.randomUUID();

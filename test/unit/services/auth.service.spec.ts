@@ -4,6 +4,11 @@ import { Test } from '@nestjs/testing';
 import { RedisService } from 'src/common/redis/redis.service';
 import { AuthRepository } from 'src/shop/auth/auth.repository';
 import { AuthService } from 'src/shop/auth/auth.service';
+import * as bcrypt from 'bcrypt';
+
+jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
+}));
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -15,6 +20,7 @@ describe('AuthService', () => {
 
   const authRepositoryMock = {
     findAuth: jest.fn(),
+    findAdminAuth: jest.fn(),
   };
 
   const redisMock = {
@@ -210,6 +216,88 @@ describe('AuthService', () => {
       expect(result).toEqual(true);
       expect(redisMock.del).toHaveBeenCalledWith(`refresh:${userId}:${randomUUID}`);
       expect(jwtMock.signAsync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('관리자 로그인', () => {
+    it('로그인 시 액세스 토큰과 리프레시 토큰을 발급받는다.', async () => {
+      const loginDto = { account: 'test', password: '1234', type: 'general' } as any;
+
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: 1,
+        randomUUID: 'fixed-uuid',
+        role: 'ADMIN',
+      });
+
+      authRepositoryMock.findAdminAuth.mockResolvedValue([{ user_idx: 1, account: 'test', password: 'hashed-password' }]);
+
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      jwtMock.signAsync.mockResolvedValueOnce('access-token').mockResolvedValueOnce('refresh-token');
+
+      redisMock.set.mockResolvedValue('OK');
+
+      const result = await service.adminLogin(loginDto, '');
+
+      expect(result).toEqual({
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+      });
+
+      expect(jwtMock.signAsync).toHaveBeenNthCalledWith(1, { sub: 1 }, { secret: process.env.JWT_SECRET, expiresIn: '15m' });
+      expect(jwtMock.signAsync).toHaveBeenNthCalledWith(
+        2,
+        { sub: 1, randomUUID: 'fixed-uuid', role: 'ADMIN' },
+        { secret: process.env.JWT_SECRET, expiresIn: '14d' },
+      );
+    });
+
+    it('쿠키의 리프레시 토큰이 유저 로그인으로 발급된 경우 400을 반환한다.', async () => {
+      const loginDto = { account: 'test', password: '1234', type: 'general' } as any;
+
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: 1,
+        randomUUID: 'fixed-uuid',
+        role: 'USER',
+      });
+
+      expect(service.adminLogin(loginDto, 'user-refresh-token')).rejects.toMatchObject({
+        status: 400,
+      });
+    });
+
+    it('로그인을 성공했지만 유저가 존재하지 않은 경우 404를 반환한다.', async () => {
+      const loginDto = { account: 'test', password: '1234', type: 'general' } as any;
+
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: 1,
+        randomUUID: 'fixed-uuid',
+        role: 'ADMIN',
+      });
+
+      authRepositoryMock.findAdminAuth.mockResolvedValue([]);
+
+      expect(service.adminLogin(loginDto, 'user-refresh-token')).rejects.toMatchObject({
+        status: 404,
+      });
+    });
+
+    it('비밀번호를 올바르게 입력하지 않은 경우 400을 반환한다.', async () => {
+      const loginDto = { account: 'test', password: '1234', type: 'general' } as any;
+
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: 1,
+        randomUUID: 'fixed-uuid',
+        role: 'ADMIN',
+      });
+
+      authRepositoryMock.findAdminAuth.mockResolvedValue([{ user_idx: 1, account: 'test', password: 'hashed-password' }]);
+
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      expect(service.adminLogin(loginDto, 'user-refresh-token')).rejects.toMatchObject({
+        status: 400,
+      });
     });
   });
 });
