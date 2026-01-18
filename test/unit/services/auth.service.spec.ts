@@ -296,7 +296,7 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       expect(service.adminLogin(loginDto, 'user-refresh-token')).rejects.toMatchObject({
-        status: 401,
+        status: 400,
       });
     });
   });
