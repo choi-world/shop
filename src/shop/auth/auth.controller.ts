@@ -20,6 +20,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @UseGuards(JwtAuthGuard)
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refresh_token;
     if (!refreshToken) throw new HttpException('유효하지 않은 로그인입니다.', HttpStatus.UNAUTHORIZED);

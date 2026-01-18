@@ -19,6 +19,7 @@ describe('AuthService', () => {
 
   const redisMock = {
     set: jest.fn(),
+    get: jest.fn(),
   };
 
   const httpMock = {
@@ -127,6 +128,63 @@ describe('AuthService', () => {
 
       expect(service.login(loginDto, '')).rejects.toMatchObject({
         status: 404,
+      });
+    });
+  });
+
+  describe('리프레시 토큰을 통한 액세스 토큰 재발급', () => {
+    it('정상적으로 엑세스 토큰을 재발급받는다.', async () => {
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: 1,
+        randomUUID: 'fixed-uuid',
+        role: 'USER',
+      });
+
+      redisMock.get.mockResolvedValue('1');
+
+      jwtMock.signAsync.mockResolvedValue('new-access-token');
+
+      const result = await service.refresh('refresh-token');
+
+      expect(result).toEqual('new-access-token');
+      expect(jwtMock.verifyAsync).toHaveBeenCalledWith('refresh-token', {
+        secret: process.env.JWT_SECRET,
+      });
+      expect(redisMock.get).toHaveBeenCalledWith('refresh:1:fixed-uuid');
+      expect(jwtMock.signAsync).toHaveBeenCalledWith({ sub: 1 }, { secret: process.env.JWT_SECRET, expiresIn: '15m' });
+    });
+
+    it('리프레시 토큰에 정보가 존재하지 않는 경우 401을 반환한다.', () => {
+      jwtMock.verifyAsync.mockResolvedValue(null);
+
+      expect(service.refresh('')).rejects.toMatchObject({
+        status: 401,
+      });
+    });
+
+    it('리프레시 토큰에 올바르지 않은 유저 정보가 존재할 경우 401을 반환한다.', () => {
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: undefined,
+        randomUUID: undefined,
+        role: 'USER',
+      });
+
+      expect(service.refresh('refresh-token')).rejects.toMatchObject({
+        status: 401,
+      });
+    });
+
+    it('리프레시 토큰이 만료되었을 경우 401을 반환한다.', () => {
+      jwtMock.verifyAsync.mockResolvedValue({
+        sub: 1,
+        randomUUID: 'fixed-uuid',
+        role: 'USER',
+      });
+
+      redisMock.get.mockResolvedValue(null);
+
+      expect(service.refresh('refresh-token')).rejects.toMatchObject({
+        status: 401,
       });
     });
   });
