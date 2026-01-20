@@ -44,12 +44,7 @@ async function bootstrap() {
 
   // 요청 로깅
   app.use((req, res, next) => {
-    console.log(
-      new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
-      '[REQ]',
-      req.method,
-      req.originalUrl,
-    );
+    console.log(new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }), '[REQ]', req.method, req.originalUrl);
     next();
   });
 

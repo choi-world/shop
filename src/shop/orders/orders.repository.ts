@@ -6,4 +6,3 @@ import { Schema } from '../../db';
 export class OrdersRepository {
   constructor(@Inject('DB') private readonly db: Kysely<Schema>) {}
 }
-

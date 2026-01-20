@@ -10,26 +10,11 @@ console.log(
 export const db = new Kysely<Schema>({
   dialect: new MysqlDialect({
     pool: createPool({
-      host:
-        process.env.ENVIRONMENT == 'production'
-          ? process.env.PRD_DB_HOST
-          : process.env.DEV_DB_HOST,
-      user:
-        process.env.ENVIRONMENT == 'production'
-          ? process.env.PRD_DB_USER
-          : process.env.DEV_DB_USER,
-      password:
-        process.env.ENVIRONMENT == 'production'
-          ? process.env.PRD_DB_PASSWORD
-          : process.env.DEV_DB_PASSWORD,
-      database:
-        process.env.ENVIRONMENT == 'production'
-          ? process.env.PRD_DB_NAME
-          : process.env.DEV_DB_NAME,
-      port:
-        process.env.ENVIRONMENT == 'production'
-          ? Number(process.env.PRD_DB_PORT)
-          : Number(process.env.DEV_DB_PORT),
+      host: process.env.ENVIRONMENT == 'production' ? process.env.PRD_DB_HOST : process.env.DEV_DB_HOST,
+      user: process.env.ENVIRONMENT == 'production' ? process.env.PRD_DB_USER : process.env.DEV_DB_USER,
+      password: process.env.ENVIRONMENT == 'production' ? process.env.PRD_DB_PASSWORD : process.env.DEV_DB_PASSWORD,
+      database: process.env.ENVIRONMENT == 'production' ? process.env.PRD_DB_NAME : process.env.DEV_DB_NAME,
+      port: process.env.ENVIRONMENT == 'production' ? Number(process.env.PRD_DB_PORT) : Number(process.env.DEV_DB_PORT),
     }),
   }),
 });

@@ -4,7 +4,6 @@ import { AuthRepository } from '../auth/auth.repository';
 import { randomAccountName } from 'src/common/modules/modules';
 import { RegisterDTO } from './dto/register.dto';
 import { randomUUID } from 'crypto';
-import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 import { RedisService } from 'src/common/redis/redis.service';
 

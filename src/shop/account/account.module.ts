@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
-import { JwtService } from '@nestjs/jwt';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
-import { RedisService } from 'src/common/redis/redis.service';
+import { JwtAppModule } from 'src/common/jwt/jwt.module';
+import { RedisModule } from 'src/common/redis/redis.module';
 
 @Module({
-  imports: [AuthModule, UsersModule],
+  imports: [AuthModule, UsersModule, JwtAppModule, RedisModule],
   controllers: [AccountController],
-  providers: [AccountService, JwtService, RedisService],
+  providers: [AccountService],
   exports: [],
 })
 export class AccountModule {}

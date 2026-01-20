@@ -8,14 +8,7 @@ import { AccountModule } from './shop/account/account.module';
 import { HealthController } from './shop/health/health.controller';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    UsersModule,
-    AuthModule,
-    ProductsModule,
-    OrdersModule,
-    AccountModule,
-  ],
+  imports: [DatabaseModule, UsersModule, AuthModule, ProductsModule, OrdersModule, AccountModule],
   controllers: [HealthController], // 헬스 체크는 모듈로 관리하지 않음.
 })
 export class AppModule {}
